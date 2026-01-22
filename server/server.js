@@ -20,6 +20,20 @@ const {
   getAllServiceData
 } = require('./mock-services');
 
+// Import scenario engine
+const {
+  FACTORY_BASELINE,
+  COMPONENTS,
+  getAllPresets,
+  getPreset,
+  saveCustomPreset,
+  deleteCustomPreset,
+  activateScenario,
+  getActiveScenario,
+  clearActiveScenario,
+  buildScenarioAwarePrompt
+} = require('./scenarios');
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -479,6 +493,9 @@ const pipelineSteps = [
     execute: async (context) => {
       log('Sending data to Gemini 2.0 Flash for analysis...', 'ai');
 
+      // Check for active scenario
+      const activeScenario = getActiveScenario();
+
       const metrics = {
         sales: {
           total: context.sales.length,
@@ -500,7 +517,34 @@ const pipelineSteps = [
         }
       };
 
-      const prompt = `You are an AI manufacturing operations manager for SoundPod Pro wireless earbuds.
+      // If scenario is active, merge simulated data and use enhanced prompt
+      if (activeScenario) {
+        log(`SCENARIO ACTIVE: ${activeScenario.name}`, 'warning');
+        const sim = activeScenario.simulatedData;
+
+        // Add scenario injected orders to metrics
+        metrics.scenario = {
+          name: activeScenario.name,
+          injectedOrders: sim.injectedOrders,
+          capacityAnalysis: sim.capacityAnalysis,
+          criticalDecisions: sim.criticalDecisions.length
+        };
+
+        // Log scenario details
+        log(`Scenario: ${sim.capacityAnalysis.totalDemand} units demanded, ${sim.capacityAnalysis.earliestDeadline} days deadline`, 'info');
+        log(`Capacity utilization: ${sim.capacityAnalysis.capacityUtilization}%`, sim.capacityAnalysis.capacityUtilization > 100 ? 'warning' : 'info');
+
+        if (sim.criticalDecisions.length > 0) {
+          log(`${sim.criticalDecisions.length} critical decisions require human input`, 'warning');
+        }
+      }
+
+      // Build prompt (scenario-aware or default)
+      let prompt;
+      if (activeScenario) {
+        prompt = buildScenarioAwarePrompt(context, activeScenario);
+      } else {
+        prompt = `You are an AI manufacturing operations manager for SoundPod Pro wireless earbuds.
 
 CURRENT DATA:
 ${JSON.stringify(metrics, null, 2)}
@@ -526,6 +570,7 @@ Analyze this data and recommend actions. Respond in JSON:
   ],
   "question": "A specific question to ask the human operator for guidance"
 }`;
+      }
 
       let aiResult;
 
@@ -533,8 +578,17 @@ Analyze this data and recommend actions. Respond in JSON:
         const response = await callGemini(prompt);
         log(`Raw AI response: ${response.substring(0, 200)}...`, 'info');
         aiResult = JSON.parse(response);
+
+        // If scenario active, enhance with scenario data
+        if (activeScenario) {
+          aiResult.scenario = {
+            name: activeScenario.name,
+            simulatedData: activeScenario.simulatedData
+          };
+        }
       } catch (e) {
         log(`AI parse error: ${e.message}`, 'error');
+
         // Provide sensible defaults based on actual data
         const hasDefects = context.defects.length > 50;
         const hasPendingOrders = context.sales.filter(s => s.status === 'Processing').length > 10;
@@ -566,11 +620,31 @@ Analyze this data and recommend actions. Respond in JSON:
           ],
           question: 'AI analysis completed with fallback logic. Which actions would you like to proceed with?'
         };
+
+        // Add scenario data even on fallback
+        if (activeScenario) {
+          aiResult.scenario = {
+            name: activeScenario.name,
+            simulatedData: activeScenario.simulatedData
+          };
+          aiResult.criticalDecisions = activeScenario.simulatedData.criticalDecisions;
+          aiResult.findings = [
+            ...aiResult.findings,
+            `SCENARIO: ${activeScenario.simulatedData.capacityAnalysis.totalDemand} units demanded`,
+            `Capacity utilization: ${activeScenario.simulatedData.capacityAnalysis.capacityUtilization}%`,
+            `${activeScenario.simulatedData.criticalDecisions.length} critical decisions pending`
+          ];
+        }
       }
 
       log('AI analysis complete', 'ai');
       log(`AI recommends: ${(aiResult.recommendedActions || []).map(a => a.action).join(', ') || 'none'}`, 'ai');
-      return { aiResult, metrics };
+
+      if (aiResult.criticalDecisions?.length > 0) {
+        log(`CRITICAL: ${aiResult.criticalDecisions.length} decisions require your input`, 'warning');
+      }
+
+      return { aiResult, metrics, activeScenario };
     }
   },
   {
@@ -912,6 +986,79 @@ app.get('/api/services/qms/audits', (req, res) => {
 
 app.get('/api/services/notifications', (req, res) => {
   res.json(NotificationService.getAll());
+});
+
+// ============================================
+// SCENARIO MANAGEMENT ENDPOINTS
+// ============================================
+
+// Get all presets (built-in + custom)
+app.get('/api/scenarios/presets', (req, res) => {
+  res.json(getAllPresets());
+});
+
+// Get a specific preset
+app.get('/api/scenarios/presets/:id', (req, res) => {
+  const preset = getPreset(req.params.id);
+  if (preset) {
+    res.json(preset);
+  } else {
+    res.status(404).json({ error: 'Preset not found' });
+  }
+});
+
+// Save a custom preset
+app.post('/api/scenarios/presets', (req, res) => {
+  try {
+    const saved = saveCustomPreset(req.body);
+    res.json(saved);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Delete a custom preset
+app.delete('/api/scenarios/presets/:id', (req, res) => {
+  const deleted = deleteCustomPreset(req.params.id);
+  if (deleted) {
+    res.json({ success: true });
+  } else {
+    res.status(404).json({ error: 'Preset not found or is built-in' });
+  }
+});
+
+// Get active scenario
+app.get('/api/scenarios/active', (req, res) => {
+  const active = getActiveScenario();
+  res.json(active || { active: false });
+});
+
+// Activate a scenario
+app.post('/api/scenarios/activate/:id', (req, res) => {
+  try {
+    const scenario = activateScenario(req.params.id);
+    log(`Scenario activated: ${scenario.name}`, 'warning');
+    broadcast({ type: 'scenario_activated', data: scenario });
+    res.json(scenario);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Deactivate scenario (return to real data)
+app.post('/api/scenarios/deactivate', (req, res) => {
+  clearActiveScenario();
+  log('Scenario deactivated - using real data', 'info');
+  broadcast({ type: 'scenario_deactivated' });
+  res.json({ success: true });
+});
+
+// Get factory baseline parameters
+app.get('/api/scenarios/factory', (req, res) => {
+  res.json({
+    baseline: FACTORY_BASELINE,
+    components: COMPONENTS
+  });
 });
 
 const PORT = process.env.PORT || 3001;

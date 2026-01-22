@@ -12,6 +12,7 @@ A human-in-the-loop AI agent system for manufacturing operations management. Fea
 - [Architecture](#architecture)
 - [Configuration](#configuration)
 - [User Guide](#user-guide)
+- [Scenario Simulation](#scenario-simulation)
 - [API Reference](#api-reference)
 - [Mock Services](#mock-services)
 - [Troubleshooting](#troubleshooting)
@@ -37,6 +38,8 @@ The AI Manufacturing Control Center is a web-based application that demonstrates
 |---------|-------------|
 | **Human-in-the-Loop** | AI waits for human approval before executing actions |
 | **Auto-Pilot Mode** | Toggle to let AI run fully autonomously |
+| **Scenario Simulation** | Test different manufacturing scenarios with built-in presets |
+| **Critical Decision Support** | AI identifies critical decisions and presents trade-offs |
 | **Real-Time Terminal** | Live logs of all operations and AI communications |
 | **Mock Enterprise Services** | Simulated Email, ERP, CRM, HR, Shipping, Payments |
 | **Visual Pipeline** | See workflow progress step-by-step |
@@ -246,6 +249,145 @@ Use the chat input at the bottom of the AI Decision Panel:
 
 ---
 
+## Scenario Simulation
+
+The Scenario Simulation system allows you to test different manufacturing situations without modifying the original data files. The system simulates data additions and calculates capacity, inventory, labor, and cost impacts.
+
+### Accessing Scenarios
+
+1. Click the **"Scenarios"** tab in the navigation bar
+2. Browse available presets or create custom scenarios
+3. Click **"Activate"** on a scenario to enable it
+4. Return to **"Dashboard"** and run the AI Agent
+5. The AI will analyze the scenario and provide critical decision guidance
+
+### Factory Baseline Parameters
+
+The simulation uses these factory constants:
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| Daily Capacity | 500 units | Normal daily production |
+| Max Capacity | 750 units | Maximum with overtime/shifts |
+| Production Workers | 120 | Workers on production line |
+| Shifts Per Day | 2 | Normal shift count |
+| Max Shifts | 3 | Maximum possible shifts |
+| Hours Per Shift | 8 | Standard shift length |
+| Worker Hourly Rate | $25 | Normal hourly wage |
+| Overtime Multiplier | 1.5x | Overtime pay rate |
+| Temp Worker Rate | $35/hr | Temporary worker cost |
+| Normal Lead Time | 7 days | Standard material delivery |
+| Expedited Lead Time | 2 days | Rush material delivery |
+| Expedited Premium | 2.5x | Rush order cost multiplier |
+| Safety Stock | 5 days | Normal safety inventory |
+| Critical Stock | 2 days | Minimum inventory threshold |
+
+### Built-in Scenario Presets
+
+#### 1. Normal Operations
+- **Scenario**: Baseline factory operation
+- **Order Volume**: 500 units
+- **Deadline**: 5 days
+- **Purpose**: Test standard workflow without stress conditions
+
+#### 2. Urgent Large Order
+- **Scenario**: Customer requests 5,000 units in 10 days
+- **Challenge**: 10x normal capacity required
+- **Critical Decisions**:
+  - Overtime authorization (how many hours?)
+  - Temp worker hiring (how many?)
+  - Expedited materials (which components?)
+  - Partial delivery negotiation
+
+#### 3. Supply Chain Crisis
+- **Scenario**: Key supplier (Bluetooth chips) delayed 3 weeks
+- **Challenge**: Production may halt without components
+- **Critical Decisions**:
+  - Alternative supplier qualification
+  - Expedited shipping costs
+  - Production line resequencing
+  - Customer communication strategy
+
+#### 4. Quality Crisis
+- **Scenario**: Defect rate spikes to 15% (normal: 3-5%)
+- **Challenge**: Rework costs and delivery delays
+- **Critical Decisions**:
+  - Root cause investigation scope
+  - Production line slowdown vs. stop
+  - Supplier audit scheduling
+  - Customer notification threshold
+
+#### 5. Seasonal Peak (Q4)
+- **Scenario**: Holiday rush with 8,000 units over 30 days
+- **Challenge**: Sustained high-volume production
+- **Critical Decisions**:
+  - Hiring plan (permanent vs. temp)
+  - Inventory pre-build strategy
+  - Supplier capacity reservations
+  - Shift schedule optimization
+
+#### 6. Cost Optimization
+- **Scenario**: 10% margin reduction mandate
+- **Challenge**: Reduce costs without quality impact
+- **Critical Decisions**:
+  - Supplier renegotiation targets
+  - Process efficiency improvements
+  - Inventory carrying cost reduction
+  - Labor optimization strategies
+
+### Scenario Analysis Output
+
+When a scenario is active, the AI provides:
+
+1. **Capacity Analysis**
+   - Units required vs. available capacity
+   - Days needed at normal vs. max production
+   - Utilization percentage
+
+2. **Material Requirements**
+   - Components needed per BOM
+   - Current stock vs. required stock
+   - Lead time impact (normal vs. rush)
+
+3. **Labor Analysis**
+   - Overtime hours required
+   - Temp workers needed
+   - Total additional labor cost
+
+4. **Cost Projections**
+   - Normal production cost
+   - Overtime scenario cost
+   - Rush/expedited scenario cost
+
+5. **Critical Decisions**
+   - Decision type and urgency level
+   - Available options with trade-offs
+   - AI recommendation with reasoning
+
+### Critical Decision Types
+
+| Type | Description | Example |
+|------|-------------|---------|
+| **CAPACITY** | Production capacity decisions | Add shift? Hire temps? |
+| **PROCUREMENT** | Material sourcing decisions | Rush order? Alt supplier? |
+| **LABOR** | Workforce decisions | Overtime hours? New hires? |
+| **QUALITY** | Quality control decisions | Increase inspection? Stop line? |
+| **DELIVERY** | Customer delivery decisions | Partial ship? Negotiate deadline? |
+| **COST** | Financial trade-off decisions | Premium materials? Expedite? |
+
+### Human-in-the-Loop Decision Process
+
+When the AI identifies a critical decision:
+
+1. **Presentation**: AI explains the situation and stakes
+2. **Options**: Multiple choices presented with pros/cons
+3. **Recommendation**: AI suggests best option with reasoning
+4. **Human Choice**: Operator selects preferred option
+5. **Execution**: Workflows execute based on human decision
+6. **Feedback**: Results shown in terminal and reports
+
+---
+
 ## API Reference
 
 ### REST Endpoints
@@ -290,6 +432,73 @@ Returns invoices.
 
 #### GET /api/services/qms/audits
 Returns scheduled audits.
+
+### Scenario Endpoints
+
+#### GET /api/scenarios/presets
+Returns all available scenario presets (built-in and custom).
+
+```json
+{
+  "normal_operations": {
+    "id": "normal_operations",
+    "name": "Normal Operations",
+    "description": "Baseline factory operation",
+    "category": "baseline",
+    "isBuiltIn": true,
+    "parameters": {...}
+  },
+  ...
+}
+```
+
+#### GET /api/scenarios/presets/:id
+Returns a specific scenario preset by ID.
+
+#### POST /api/scenarios/presets
+Saves a custom scenario preset.
+
+```json
+{
+  "id": "my_custom_scenario",
+  "name": "My Custom Scenario",
+  "description": "Custom test case",
+  "parameters": {
+    "orderVolume": 3000,
+    "deadlineDays": 14,
+    ...
+  }
+}
+```
+
+#### DELETE /api/scenarios/presets/:id
+Deletes a custom scenario preset (cannot delete built-in presets).
+
+#### GET /api/scenarios/active
+Returns the currently active scenario and simulated data.
+
+```json
+{
+  "active": true,
+  "scenario": {...},
+  "simulatedData": {
+    "capacityAnalysis": {...},
+    "materialRequirements": [...],
+    "laborAnalysis": {...},
+    "costProjections": {...},
+    "criticalDecisions": [...]
+  }
+}
+```
+
+#### POST /api/scenarios/activate/:id
+Activates a scenario preset by ID.
+
+#### POST /api/scenarios/deactivate
+Deactivates the current scenario, returning to normal operations.
+
+#### GET /api/scenarios/factory
+Returns factory baseline parameters.
 
 ### WebSocket Messages
 
@@ -485,7 +694,8 @@ ai-control-center/
 ├── server/
 │   ├── package.json          # Backend dependencies
 │   ├── server.js             # Main server (Express + WebSocket)
-│   └── mock-services.js      # Simulated enterprise services
+│   ├── mock-services.js      # Simulated enterprise services
+│   └── scenarios.js          # Scenario simulation engine
 └── client/
     ├── package.json          # Frontend dependencies
     ├── vite.config.js        # Vite configuration
@@ -494,7 +704,7 @@ ai-control-center/
     │   └── logo.png          # Application logo
     └── src/
         ├── main.jsx          # React entry point
-        └── App.jsx           # Main React component
+        └── App.jsx           # Main React component (Dashboard + Scenarios)
 ```
 
 ---
