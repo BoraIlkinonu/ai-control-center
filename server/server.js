@@ -48,6 +48,39 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Test Users Authentication (set TEST_AUTH=true to enable)
+const TEST_USERS = {
+  'testuser1': 'password123',
+  'testuser2': 'password456',
+  'admin': 'adminpass'
+};
+
+if (process.env.TEST_AUTH === 'true') {
+  app.use((req, res, next) => {
+    // Skip auth for health checks
+    if (req.path === '/health') return next();
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Basic ')) {
+      res.setHeader('WWW-Authenticate', 'Basic realm="AI Control Center - Test Users Only"');
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const base64Credentials = authHeader.split(' ')[1];
+    const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
+    const [username, password] = credentials.split(':');
+
+    if (TEST_USERS[username] && TEST_USERS[username] === password) {
+      req.user = username;
+      return next();
+    }
+
+    res.setHeader('WWW-Authenticate', 'Basic realm="AI Control Center - Test Users Only"');
+    return res.status(401).json({ error: 'Invalid credentials' });
+  });
+  console.log('Test user authentication ENABLED');
+}
+
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
@@ -995,6 +1028,20 @@ wss.on('connection', (ws) => {
   });
 });
 
+// Health check endpoint (no auth required)
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+// Serve static frontend files in production
+if (process.env.NODE_ENV === 'production') {
+  const publicPath = path.join(__dirname, 'public');
+  if (fs.existsSync(publicPath)) {
+    app.use(express.static(publicPath));
+    console.log('Serving static files from:', publicPath);
+  }
+}
+
 // REST endpoints
 app.get('/api/state', (req, res) => {
   res.json(pipelineState);
@@ -1107,8 +1154,23 @@ app.get('/api/scenarios/factory', (req, res) => {
   });
 });
 
+// SPA fallback - serve index.html for all non-API routes in production
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(404).json({ error: 'Not found' });
+    }
+  });
+}
+
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`AI Control Center server running on http://localhost:${PORT}`);
   console.log(`WebSocket available on ws://localhost:${PORT}`);
+  if (process.env.TEST_AUTH === 'true') {
+    console.log('Authentication: ENABLED (test users only)');
+  }
 });

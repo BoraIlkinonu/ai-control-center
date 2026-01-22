@@ -958,6 +958,64 @@ node server.js
 
 ---
 
+## Cloud Deployment (Test Users Only)
+
+Fully automated deployment to Google Cloud - restricted to whitelisted test users only.
+
+### Prerequisites
+
+1. [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) installed
+2. Google account with billing enabled
+3. Gemini API key from [AI Studio](https://aistudio.google.com/app/apikey)
+
+### One-Command Deploy
+
+```powershell
+# 1. Edit deploy\deploy-gcp.ps1 with your details:
+$PROJECT_ID = "ai-control-center-demo"
+$GEMINI_API_KEY = "AIzaSy..."
+$TEST_USERS = @("you@gmail.com", "teammate@gmail.com")
+
+# 2. Run (handles everything automatically)
+.\deploy\deploy-gcp.ps1
+```
+
+The script automatically:
+- Creates GCP project (if needed)
+- Enables required APIs
+- Builds and deploys containers
+- Configures test user access
+- Outputs your URLs
+
+### Access Control
+
+- **No public access** - only whitelisted Google accounts
+- Users login with their Google account
+- Perfect for demos and internal testing
+
+### What Gets Deployed
+
+```
+Google Cloud Run
+├── AI Control Center (port 3001)
+│   ├── React Frontend
+│   ├── Node.js Backend
+│   └── WebSocket Server
+│
+└── n8n (port 5678)
+    └── Workflow Automation
+```
+
+### Estimated Costs
+
+| Service | Cost |
+|---------|------|
+| Cloud Run (both services) | ~$0-30/mo |
+
+*Scales to zero when not in use. Pay only for actual usage.*
+
+---
+
 ## Logger Module
 
 The system includes a centralized logging module for detailed debugging and monitoring.
@@ -1050,6 +1108,10 @@ ai-control-center/
 ├── README.md                 # This file
 ├── .gitignore               # Git ignore rules
 ├── start.bat                 # Windows startup script
+├── deploy/                   # Cloud deployment files
+│   ├── Dockerfile           # Combined container build
+│   ├── docker-compose.yml   # Local testing with n8n
+│   └── deploy-gcp.ps1       # Automated GCP deployment
 ├── server/
 │   ├── package.json          # Backend dependencies
 │   ├── server.js             # Main server (Express + WebSocket)

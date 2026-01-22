@@ -1,0 +1,36 @@
+# Docker Compose for local testing with n8n
+# Run: docker-compose up
+
+version: '3.8'
+
+services:
+  ai-control-center:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - TEST_AUTH=true
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=n8npassword
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: unless-stopped
+
+volumes:
+  n8n_data:
