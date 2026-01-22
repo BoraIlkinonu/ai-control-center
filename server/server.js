@@ -85,7 +85,11 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 // Configuration
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyBKE96eysMe-YuJTFPWRXwrdSU4XZo13g8';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+if (!GEMINI_API_KEY) {
+  console.warn('WARNING: GEMINI_API_KEY not set. AI features will not work.');
+  console.warn('Set it with: set GEMINI_API_KEY=your-key-here');
+}
 const DATA_PATH = 'D:/n8n/data';
 const N8N_API_URL = 'http://localhost:5678/api/v1';
 const N8N_API_KEY = process.env.N8N_API_KEY || ''; // Set this after creating API key in n8n
@@ -995,12 +999,21 @@ wss.on('connection', (ws) => {
               }
             }
           );
-          ws.send(JSON.stringify({ type: 'simulation_status', data: startResult }));
+          // Send back status with running flag
+          ws.send(JSON.stringify({
+            type: 'simulation_status',
+            data: { ...startResult, running: startResult.success, paused: false }
+          }));
+          console.log('Simulation loop started, sending status:', startResult);
           break;
 
         case 'stop_simulation_loop':
           const stopResult = stopLoop(broadcast);
-          ws.send(JSON.stringify({ type: 'simulation_status', data: stopResult }));
+          ws.send(JSON.stringify({
+            type: 'simulation_status',
+            data: { ...stopResult, running: false, paused: false }
+          }));
+          console.log('Simulation loop stopped');
           break;
 
         case 'pause_simulation_loop':
