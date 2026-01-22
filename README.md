@@ -13,6 +13,9 @@ A human-in-the-loop AI agent system for manufacturing operations management. Fea
 - [Configuration](#configuration)
 - [User Guide](#user-guide)
 - [Scenario Simulation](#scenario-simulation)
+- [Visual Simulation Tab](#visual-simulation-tab)
+- [Artifact Visualization](#artifact-visualization)
+- [Continuous Simulation Loop](#continuous-simulation-loop)
 - [API Reference](#api-reference)
 - [Mock Services](#mock-services)
 - [Troubleshooting](#troubleshooting)
@@ -45,6 +48,10 @@ The AI Manufacturing Control Center is a web-based application that demonstrates
 | **Visual Pipeline** | See workflow progress step-by-step |
 | **AI Chat** | Ask questions about the data anytime |
 | **Service Monitoring** | Track all mock API calls (emails, POs, invoices) |
+| **Visual Simulation Tab** | Real-time factory floor, timeline, and material flow visualization |
+| **Expandable Artifacts** | Click to expand emails, POs, invoices with full details |
+| **Artifact Detail Modal** | Full-screen modal view of any artifact |
+| **Continuous Simulation Loop** | Game-like random event simulation with auto-advancing scenarios |
 
 ---
 
@@ -388,6 +395,265 @@ When the AI identifies a critical decision:
 
 ---
 
+## Visual Simulation Tab
+
+The Visual Simulation tab provides real-time graphical representation of factory operations during scenario execution.
+
+### Accessing the Simulation View
+
+1. Click the **"Simulation"** tab in the center panel (alongside Terminal and Services)
+2. The view updates in real-time as scenarios execute
+3. Data reflects the active scenario's parameters
+
+### Visual Components
+
+#### Factory Floor View
+
+A visual representation of production stations showing:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  FACTORY FLOOR                                                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
+│  │ Assembly │ │ Quality  │ │ Packaging│ │ Shipping │           │
+│  │ Station  │ │ Control  │ │ Station  │ │ Dock     │           │
+│  │ ████░░░░ │ │ ██████░░ │ │ ████████ │ │ ██░░░░░░ │           │
+│  │ 45%      │ │ 75%      │ │ 100%     │ │ 25%      │           │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
+│                                                                 │
+│  Workers: 95/120    Efficiency: 87%    Throughput: 312/day     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+- **Station Progress Bars**: Color-coded utilization (green = optimal, yellow = stressed, red = blocked)
+- **Worker Allocation**: Shows current workers vs. available
+- **Efficiency Metric**: Real-time machine efficiency percentage
+- **Daily Throughput**: Actual vs. target production rate
+
+#### Order Timeline View
+
+A Gantt-style timeline showing order progress:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  ORDER TIMELINE                                                 │
+│                                                                 │
+│  ORD-001 ████████████░░░░░░░░░░░░░░░░ 45% │ Due: Jan 25        │
+│  ORD-002 ██████████████████░░░░░░░░░░ 65% │ Due: Jan 28        │
+│  ORD-003 ████████████████████████████ 100%│ COMPLETED          │
+│                                                                 │
+│  [Today]────────────────────────────────────────────[Deadline]  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+- **Progress Bars**: Visual completion status per order
+- **Deadline Markers**: Color-coded urgency (green = on track, red = at risk)
+- **Capacity Overlay**: Shows when capacity is exceeded
+
+#### Material Flow Diagram
+
+Animated flow showing materials through production:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  MATERIAL FLOW                                                  │
+│                                                                 │
+│  [Inventory] ──→ [Production] ──→ [QC] ──→ [Shipping]          │
+│   ████████        ████████░░░      ████     ██░░░░░░           │
+│   125 units       87 in-progress   45 pass  23 ready           │
+│                                                                 │
+│  Component Status:                                              │
+│  • Bluetooth Chips: ████████░░ 245/300 (ADEQUATE)              │
+│  • Batteries:       ██████░░░░ 180/300 (LOW)                   │
+│  • Enclosures:      ██████████ 320/300 (GOOD)                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+- **Pipeline Stages**: Visual flow from inventory to shipping
+- **Component Status**: Stock levels with color indicators
+- **Bottleneck Highlighting**: Red indicators when flow is blocked
+
+---
+
+## Artifact Visualization
+
+The system provides enhanced visualization for all generated artifacts (emails, purchase orders, invoices, audits).
+
+### Expandable Artifact Cards
+
+Click any artifact in the bottom panels to expand it in-place:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ ▼ EMAIL: Quality Alert - BTH-200 Component Issues              │
+├─────────────────────────────────────────────────────────────────┤
+│ To: supplier@chiptech.com                                       │
+│ Subject: Quality Alert - BTH-200 Component Issues               │
+│ Sent: 2025-01-22 14:32:15                                       │
+│                                                                 │
+│ Body:                                                           │
+│ Dear Supplier,                                                  │
+│                                                                 │
+│ We have identified quality issues with recent shipment of       │
+│ BTH-200 Bluetooth chips. Defect rate has increased to 8.5%.     │
+│                                                                 │
+│ Please schedule a call to discuss corrective actions.           │
+│                                                                 │
+│ [View Full Details]                          [Collapse ▲]      │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Artifact Filtering
+
+Filter artifacts by type using the filter buttons:
+
+- **All**: Show all artifacts
+- **Emails**: Show only email communications
+- **POs**: Show only purchase orders
+- **Invoices**: Show only invoices
+- **Audits**: Show only scheduled audits
+
+### Detail Modal
+
+Click "View Full Details" on any artifact to open a full-screen modal with:
+
+- **Header**: Type icon, title, and timestamp
+- **Full Content**: Complete artifact details
+- **Metadata**: Creation time, status, related entities
+- **Actions**: Copy, export, or dismiss
+
+### Artifact Types
+
+| Type | Icon | Description |
+|------|------|-------------|
+| **Email** | ✉️ | Outbound communications to suppliers, customers |
+| **Purchase Order** | 📦 | Orders sent to suppliers for materials |
+| **Invoice** | 💰 | Bills generated for customer orders |
+| **Audit** | 📋 | Scheduled quality audits for suppliers |
+| **Notification** | 🔔 | Internal system notifications |
+
+---
+
+## Continuous Simulation Loop
+
+The Continuous Simulation Loop provides a game-like experience where random manufacturing events fire continuously, allowing you to observe AI decision-making over extended periods.
+
+### Starting the Simulation Loop
+
+1. Click **"Start Loop"** button in the header (next to Auto-Pilot toggle)
+2. The loop will begin generating random scenarios
+3. Events fire every 5-20 seconds (randomized)
+4. Watch the terminal and AI Decision Panel for activity
+
+### Loop Controls
+
+| Control | Action |
+|---------|--------|
+| **Start Loop** | Begin continuous simulation |
+| **Stop Loop** | Stop and show summary statistics |
+| **Pause** | Pause without losing state |
+| **Resume** | Continue from paused state |
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    SIMULATION LOOP FLOW                         │
+│                                                                 │
+│   ┌──────────────┐                                              │
+│   │ Pick Random  │                                              │
+│   │  Scenario    │◄─────────────────────────────────┐           │
+│   └──────┬───────┘                                  │           │
+│          │                                          │           │
+│          ▼                                          │           │
+│   ┌──────────────┐                                  │           │
+│   │  Randomize   │  • Order quantity ±30%           │           │
+│   │  Parameters  │  • Deadline ±25%                 │           │
+│   └──────┬───────┘  • Quality rate 2-15%            │           │
+│          │          • Worker availability ±15%      │           │
+│          ▼                                          │           │
+│   ┌──────────────┐                                  │           │
+│   │   Activate   │                                  │           │
+│   │   Scenario   │                                  │           │
+│   └──────┬───────┘                                  │           │
+│          │                                          │           │
+│          ▼                                          │           │
+│   ┌──────────────┐                                  │           │
+│   │  Run AI      │  With auto-pilot or              │           │
+│   │  Pipeline    │  human decision                  │           │
+│   └──────┬───────┘                                  │           │
+│          │                                          │           │
+│          ▼                                          │           │
+│   ┌──────────────┐                                  │           │
+│   │  Broadcast   │  WebSocket updates               │           │
+│   │  Results     │  to all clients                  │           │
+│   └──────┬───────┘                                  │           │
+│          │                                          │           │
+│          │         Wait 5-20 seconds                │           │
+│          └──────────────────────────────────────────┘           │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Scenario Pool
+
+The loop randomly selects from all built-in scenarios:
+
+- Normal Operations
+- Urgent Large Order
+- Supply Chain Crisis
+- Quality Crisis
+- Seasonal Peak
+- Cost Optimization
+
+### Parameter Randomization
+
+Each scenario iteration randomizes parameters within bounds:
+
+| Parameter | Variation | Example |
+|-----------|-----------|---------|
+| Order Quantity | ±30% | 5000 → 3500-6500 |
+| Deadline Days | ±25% | 10 → 7-13 days |
+| Quality Issue Rate | 2-15% | Random each iteration |
+| Supplier Reliability | 60-95% | Random each iteration |
+| Workers Available | ±15% | 100 → 85-115 |
+| Machine Efficiency | 80-98% | Random each iteration |
+
+### Data Isolation
+
+The simulation loop uses isolated temporary data:
+
+- **Original CSV files**: Never modified
+- **Temp database**: Created fresh for each loop session
+- **Cleanup**: Automatic on loop stop or server restart
+- **History**: Last 50 events retained for analysis
+
+### Loop Status Monitoring
+
+The header shows current loop status:
+
+```
+[🔄 Loop Active: Iteration #15] [Stop Loop]
+```
+
+Terminal logs show:
+```
+[LOOP #15] Starting scenario: Urgent Large Order
+[LOOP #15] Parameters: 4,250 units, 8 days deadline
+[LOOP #15] AI analyzing situation...
+[LOOP #15] Completed - 3 actions executed
+Next simulation event in 12.5s...
+```
+
+### Use Cases for Simulation Loop
+
+1. **Training**: Let operators observe AI decision patterns
+2. **Stress Testing**: See how the system handles varied conditions
+3. **Demo Mode**: Continuous activity for trade shows/presentations
+4. **Algorithm Tuning**: Observe AI recommendations across many scenarios
+
+---
+
 ## API Reference
 
 ### REST Endpoints
@@ -513,6 +779,10 @@ Returns factory baseline parameters.
 | `autopilot` | `{ enabled: true/false }` | Toggle auto-pilot |
 | `reset` | - | Reset pipeline state |
 | `get_services` | - | Request service data |
+| `start_simulation_loop` | `{ options: {...} }` | Start continuous simulation loop |
+| `stop_simulation_loop` | - | Stop simulation loop |
+| `pause_simulation_loop` | - | Pause simulation loop |
+| `resume_simulation_loop` | - | Resume paused loop |
 
 #### Server → Client
 
@@ -522,6 +792,10 @@ Returns factory baseline parameters.
 | `log` | `{ timestamp, message, type }` | New log entry |
 | `services` | `{ ...serviceData }` | Service data update |
 | `ai_response` | `"answer text"` | Response to question |
+| `simulation_status` | `{ running, paused, iteration }` | Loop status update |
+| `simulation_event` | `{ eventId, scenario, status }` | Loop event notification |
+| `scenario_activated` | `{ ...scenarioData }` | Scenario activated by loop |
+| `scenario_deactivated` | - | Scenario cleared |
 
 ---
 
@@ -684,6 +958,91 @@ node server.js
 
 ---
 
+## Logger Module
+
+The system includes a centralized logging module for detailed debugging and monitoring.
+
+### Usage
+
+```javascript
+const { createLogger, configure, setBroadcast } = require('./logger');
+
+// Create a component-specific logger
+const log = createLogger('MyComponent');
+
+// Log at different levels
+log.debug('Detailed debug info', { key: 'value' });
+log.info('Information message');
+log.warn('Warning message', { issue: 'description' });
+log.error('Error occurred', { error: err.message });
+
+// Timing utility
+const timer = log.time('operation');
+// ... do work ...
+timer.end('Operation finished');  // Logs with duration
+
+// Group related logs
+const group = log.group('batch-operation');
+group.add('info', 'Step 1 complete');
+group.add('info', 'Step 2 complete');
+group.end();  // Logs group summary
+```
+
+### Configuration
+
+```javascript
+const { configure, LOG_LEVELS } = require('./logger');
+
+configure({
+  level: LOG_LEVELS.DEBUG,    // Minimum level to log
+  console: true,              // Output to console
+  file: true,                 // Write to file
+  filePath: './logs/app.log', // Log file path
+  maxFileSize: 5 * 1024 * 1024, // 5MB max file size
+  colors: true                // ANSI colors in console
+});
+```
+
+### Log Levels
+
+| Level | Value | Description |
+|-------|-------|-------------|
+| DEBUG | 0 | Detailed debugging information |
+| INFO | 1 | General information messages |
+| WARN | 2 | Warning conditions |
+| ERROR | 3 | Error conditions |
+| NONE | 4 | Disable all logging |
+
+### WebSocket Integration
+
+Connect the logger to broadcast logs in real-time:
+
+```javascript
+const { setBroadcast } = require('./logger');
+
+// After WebSocket server is ready
+setBroadcast((message) => {
+  connectedClients.forEach(client => {
+    client.send(JSON.stringify(message));
+  });
+});
+```
+
+### REST Endpoint
+
+Get recent logs via API:
+
+```javascript
+// GET /api/logs?count=100&level=ERROR&component=Pipeline
+app.get('/api/logs', (req, res) => {
+  const { count, level, component, search } = req.query;
+  const logs = getRecentLogs(parseInt(count) || 100, { level, component, search });
+  res.json(logs);
+});
+```
+
+---
+
 ## File Structure
 
 ```
@@ -695,7 +1054,9 @@ ai-control-center/
 │   ├── package.json          # Backend dependencies
 │   ├── server.js             # Main server (Express + WebSocket)
 │   ├── mock-services.js      # Simulated enterprise services
-│   └── scenarios.js          # Scenario simulation engine
+│   ├── scenarios.js          # Scenario simulation engine
+│   ├── simulation-loop.js    # Continuous simulation loop controller
+│   └── logger.js             # Centralized logging module
 └── client/
     ├── package.json          # Frontend dependencies
     ├── vite.config.js        # Vite configuration
@@ -704,7 +1065,7 @@ ai-control-center/
     │   └── logo.png          # Application logo
     └── src/
         ├── main.jsx          # React entry point
-        └── App.jsx           # Main React component (Dashboard + Scenarios)
+        └── App.jsx           # Main React component (Dashboard + Scenarios + Simulation)
 ```
 
 ---

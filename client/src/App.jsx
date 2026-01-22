@@ -808,6 +808,637 @@ const styles = `
     color: #ff6b6b;
     font-weight: 600;
   }
+
+  /* ============================================
+     ENHANCED ARTIFACT VISUALIZATION
+     ============================================ */
+
+  .artifact-card {
+    background: #1a1a2e;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border-left: 3px solid #2a2a4a;
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .artifact-card:hover {
+    background: #1e1e3a;
+  }
+
+  .artifact-card.expanded {
+    background: #1e2a3e;
+  }
+
+  .artifact-card.email { border-left-color: #3b82f6; }
+  .artifact-card.po { border-left-color: #10b981; }
+  .artifact-card.invoice { border-left-color: #f59e0b; }
+  .artifact-card.audit { border-left-color: #8b5cf6; }
+  .artifact-card.shipment { border-left-color: #ec4899; }
+  .artifact-card.notification { border-left-color: #ef4444; }
+
+  .artifact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+  }
+
+  .artifact-icon {
+    font-size: 1.2rem;
+    margin-right: 10px;
+  }
+
+  .artifact-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .artifact-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: #888;
+  }
+
+  .artifact-type-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .artifact-type-badge.email { background: #1e3a5f; color: #3b82f6; }
+  .artifact-type-badge.po { background: #1a3d2a; color: #10b981; }
+  .artifact-type-badge.invoice { background: #3d2914; color: #f59e0b; }
+  .artifact-type-badge.audit { background: #2a1a4a; color: #8b5cf6; }
+  .artifact-type-badge.shipment { background: #3d1a2a; color: #ec4899; }
+
+  .artifact-expand-icon {
+    transition: transform 0.2s;
+    color: #666;
+  }
+
+  .artifact-card.expanded .artifact-expand-icon {
+    transform: rotate(180deg);
+  }
+
+  .artifact-details {
+    padding: 0 12px 12px 12px;
+    border-top: 1px solid #2a2a4a;
+    font-size: 0.8rem;
+  }
+
+  .artifact-detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1a2e;
+  }
+
+  .artifact-detail-row:last-child {
+    border-bottom: none;
+  }
+
+  .artifact-detail-label {
+    color: #888;
+  }
+
+  .artifact-detail-value {
+    color: #e0e0e0;
+    text-align: right;
+  }
+
+  .artifact-body {
+    background: #12121a;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: #aaa;
+    white-space: pre-wrap;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+
+  .artifact-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .artifact-btn {
+    padding: 4px 10px;
+    font-size: 0.7rem;
+    border-radius: 4px;
+    background: #2a2a4a;
+    border: none;
+    color: #e0e0e0;
+    cursor: pointer;
+  }
+
+  .artifact-btn:hover {
+    background: #3a3a5a;
+  }
+
+  .artifact-btn.primary {
+    background: #1e3a5f;
+    color: #00d4ff;
+  }
+
+  /* Artifact Detail Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+
+  .modal-content {
+    background: #12121a;
+    border: 1px solid #2a2a4a;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #2a2a4a;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .modal-close:hover {
+    color: #fff;
+  }
+
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .modal-section {
+    margin-bottom: 20px;
+  }
+
+  .modal-section h4 {
+    font-size: 0.85rem;
+    color: #00d4ff;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .modal-field {
+    background: #1a1a2e;
+    padding: 10px;
+    border-radius: 6px;
+  }
+
+  .modal-field-label {
+    font-size: 0.7rem;
+    color: #888;
+    margin-bottom: 4px;
+  }
+
+  .modal-field-value {
+    font-size: 0.9rem;
+    color: #e0e0e0;
+  }
+
+  .modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid #2a2a4a;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* Activity Timeline */
+  .activity-timeline {
+    padding: 12px;
+  }
+
+  .timeline-filters {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .timeline-filter {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    color: #888;
+  }
+
+  .timeline-filter.active {
+    background: #1e3a5f;
+    border-color: #00d4ff;
+    color: #00d4ff;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-left: 2px solid #2a2a4a;
+    margin-left: 8px;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2a2a4a;
+  }
+
+  .timeline-item.email::before { background: #3b82f6; }
+  .timeline-item.po::before { background: #10b981; }
+  .timeline-item.invoice::before { background: #f59e0b; }
+  .timeline-item.audit::before { background: #8b5cf6; }
+
+  .timeline-content {
+    flex: 1;
+  }
+
+  .timeline-time {
+    font-size: 0.7rem;
+    color: #666;
+  }
+
+  /* ============================================
+     VISUAL SIMULATION TAB
+     ============================================ */
+
+  .simulation-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .factory-floor {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    padding: 16px;
+    background: #1a1a2e;
+    border-radius: 8px;
+  }
+
+  .station-card {
+    background: #12121a;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+  }
+
+  .station-card.active {
+    border-color: #00d4ff;
+    animation: stationPulse 1.5s infinite;
+  }
+
+  .station-card.idle {
+    opacity: 0.6;
+  }
+
+  .station-card.blocked {
+    border-color: #ff6b6b;
+  }
+
+  @keyframes stationPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
+    50% { box-shadow: 0 0 20px 5px rgba(0, 212, 255, 0.2); }
+  }
+
+  .station-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+
+  .station-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .station-status {
+    font-size: 0.65rem;
+    color: #888;
+    text-transform: uppercase;
+  }
+
+  .station-throughput {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #4ade80;
+    margin-top: 8px;
+  }
+
+  .station-workers {
+    font-size: 0.7rem;
+    color: #888;
+    margin-top: 4px;
+  }
+
+  /* Order Timeline / Gantt */
+  .order-timeline {
+    background: #1a1a2e;
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .timeline-legend {
+    display: flex;
+    gap: 12px;
+    font-size: 0.75rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  .legend-dot.on-track { background: #4ade80; }
+  .legend-dot.at-risk { background: #ffa500; }
+  .legend-dot.overdue { background: #ff6b6b; }
+
+  .gantt-container {
+    overflow-x: auto;
+  }
+
+  .gantt-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #12121a;
+  }
+
+  .gantt-label {
+    width: 120px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gantt-bar-container {
+    flex: 1;
+    height: 24px;
+    background: #12121a;
+    border-radius: 4px;
+    position: relative;
+  }
+
+  .gantt-bar {
+    height: 100%;
+    border-radius: 4px;
+    position: absolute;
+    left: 0;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    font-size: 0.7rem;
+    color: #000;
+    font-weight: 600;
+  }
+
+  .gantt-bar.on-track { background: linear-gradient(90deg, #4ade80, #22c55e); }
+  .gantt-bar.at-risk { background: linear-gradient(90deg, #ffa500, #f59e0b); }
+  .gantt-bar.overdue { background: linear-gradient(90deg, #ff6b6b, #dc2626); }
+
+  .gantt-deadline {
+    position: absolute;
+    height: 100%;
+    width: 2px;
+    background: #ff6b6b;
+  }
+
+  /* Material Flow Diagram */
+  .material-flow {
+    background: #1a1a2e;
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .flow-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 16px 0;
+  }
+
+  .flow-node {
+    background: #12121a;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    min-width: 120px;
+    border: 2px solid #2a2a4a;
+  }
+
+  .flow-node.active {
+    border-color: #00d4ff;
+  }
+
+  .flow-node.bottleneck {
+    border-color: #ff6b6b;
+    background: #2a1414;
+  }
+
+  .flow-node-icon {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+
+  .flow-node-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .flow-node-value {
+    font-size: 0.9rem;
+    color: #4ade80;
+  }
+
+  .flow-arrow {
+    font-size: 1.5rem;
+    color: #2a2a4a;
+    flex-shrink: 0;
+  }
+
+  .flow-arrow.active {
+    color: #00d4ff;
+    animation: flowPulse 1s infinite;
+  }
+
+  @keyframes flowPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  /* ============================================
+     SIMULATION LOOP CONTROLS
+     ============================================ */
+
+  .sim-loop-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    color: #e0e0e0;
+  }
+
+  .sim-loop-toggle.active {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    border-color: #ff6b6b;
+  }
+
+  .sim-loop-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: #3d1414;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    color: #ff6b6b;
+  }
+
+  .sim-loop-indicator .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff6b6b;
+    animation: pulse 1s infinite;
+  }
+
+  .sim-controls-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #12121a;
+    border: 1px solid #2a2a4a;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 8px;
+    min-width: 280px;
+    z-index: 100;
+  }
+
+  .sim-control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .sim-control-label {
+    font-size: 0.85rem;
+    color: #888;
+  }
+
+  .sim-slider {
+    width: 120px;
+  }
+
+  .sim-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #2a2a4a;
+  }
+
+  .sim-stat {
+    text-align: center;
+  }
+
+  .sim-stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #00d4ff;
+  }
+
+  .sim-stat-label {
+    font-size: 0.7rem;
+    color: #888;
+  }
 `
 
 function App() {
@@ -827,6 +1458,11 @@ function App() {
   const [presets, setPresets] = useState({ builtIn: [], custom: [] })
   const [selectedPreset, setSelectedPreset] = useState(null)
   const [activeScenario, setActiveScenario] = useState(null)
+  const [expandedArtifact, setExpandedArtifact] = useState(null)
+  const [modalArtifact, setModalArtifact] = useState(null)
+  const [artifactFilter, setArtifactFilter] = useState('all')
+  const [aiResponse, setAiResponse] = useState(null)
+  const [simulationLoop, setSimulationLoop] = useState({ active: false, iteration: 0, history: [] })
   const terminalRef = useRef(null)
 
   const API_BASE = `http://${window.location.hostname}:3001`
@@ -859,6 +1495,20 @@ function App() {
         setActiveScenario(msg.data)
       } else if (msg.type === 'scenario_deactivated') {
         setActiveScenario(null)
+      } else if (msg.type === 'ai_response') {
+        setAiResponse(msg.data)
+      } else if (msg.type === 'simulation_event') {
+        setSimulationLoop(prev => ({
+          ...prev,
+          iteration: msg.data.iteration,
+          history: [...prev.history.slice(-20), msg.data]
+        }))
+      } else if (msg.type === 'simulation_status') {
+        setSimulationLoop(prev => ({
+          ...prev,
+          active: msg.data.running,
+          ...msg.data
+        }))
       }
     }
 
@@ -930,17 +1580,25 @@ function App() {
     }
   }
 
+  const isWsReady = () => ws && ws.readyState === WebSocket.OPEN
+
   const startPipeline = () => {
-    ws?.send(JSON.stringify({ type: 'start' }))
+    if (!isWsReady()) {
+      console.warn('WebSocket not ready, cannot start pipeline')
+      return
+    }
+    ws.send(JSON.stringify({ type: 'start' }))
   }
 
   const toggleAutoPilot = () => {
+    if (!isWsReady()) return
     const newState = !state.autoPilot
-    ws?.send(JSON.stringify({ type: 'autopilot', enabled: newState }))
+    ws.send(JSON.stringify({ type: 'autopilot', enabled: newState }))
   }
 
   const approve = () => {
-    ws?.send(JSON.stringify({
+    if (!isWsReady()) return
+    ws.send(JSON.stringify({
       type: 'approve',
       actions: selectedActions,
       message: userInput
@@ -949,18 +1607,92 @@ function App() {
   }
 
   const reject = () => {
-    ws?.send(JSON.stringify({ type: 'reject' }))
+    if (!isWsReady()) return
+    ws.send(JSON.stringify({ type: 'reject' }))
   }
 
   const askQuestion = () => {
+    if (!isWsReady()) return
     if (userInput.trim()) {
-      ws?.send(JSON.stringify({ type: 'ask', question: userInput }))
+      ws.send(JSON.stringify({ type: 'ask', question: userInput }))
       setUserInput('')
     }
   }
 
   const reset = () => {
-    ws?.send(JSON.stringify({ type: 'reset' }))
+    if (!isWsReady()) return
+    ws.send(JSON.stringify({ type: 'reset' }))
+    setAiResponse(null)
+  }
+
+  // Simulation loop controls
+  const startSimulationLoop = () => {
+    console.log('startSimulationLoop called, ws ready:', isWsReady())
+    if (!isWsReady()) {
+      console.warn('WebSocket not ready for simulation loop')
+      return
+    }
+    console.log('Sending start_simulation_loop message')
+    ws.send(JSON.stringify({
+      type: 'start_simulation_loop',
+      options: {
+        intervalMin: 5000,
+        intervalMax: 20000,
+        scenarioPool: 'all',
+        autoApprove: state.autoPilot
+      }
+    }))
+  }
+
+  const stopSimulationLoop = () => {
+    if (!isWsReady()) return
+    ws.send(JSON.stringify({ type: 'stop_simulation_loop' }))
+  }
+
+  // Artifact helper functions
+  const toggleArtifactExpand = (artifactId) => {
+    setExpandedArtifact(prev => prev === artifactId ? null : artifactId)
+  }
+
+  const openArtifactModal = (artifact, type) => {
+    setModalArtifact({ ...artifact, type })
+  }
+
+  const closeArtifactModal = () => {
+    setModalArtifact(null)
+  }
+
+  // Get all artifacts combined and sorted
+  const getAllArtifacts = () => {
+    const artifacts = []
+
+    services.emails?.forEach(email => {
+      artifacts.push({ ...email, type: 'email', timestamp: email.timestamp })
+    })
+
+    services.erp?.purchaseOrders?.forEach(po => {
+      artifacts.push({ ...po, type: 'po', timestamp: po.createdAt })
+    })
+
+    services.erp?.invoices?.forEach(inv => {
+      artifacts.push({ ...inv, type: 'invoice', timestamp: inv.createdAt })
+    })
+
+    services.qms?.audits?.forEach(audit => {
+      artifacts.push({ ...audit, type: 'audit', timestamp: audit.scheduledDate })
+    })
+
+    services.notifications?.forEach(notif => {
+      artifacts.push({ ...notif, type: 'notification', timestamp: notif.timestamp })
+    })
+
+    // Sort by timestamp descending
+    return artifacts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+  }
+
+  const filterArtifacts = (artifacts) => {
+    if (artifactFilter === 'all') return artifacts
+    return artifacts.filter(a => a.type === artifactFilter)
   }
 
   const toggleAction = (action) => {
@@ -982,6 +1714,355 @@ function App() {
 
   const decision = state.pendingDecision
   const aiResult = decision?.aiResult
+
+  // Render Artifact Card (expandable)
+  const renderArtifactCard = (artifact, index) => {
+    const isExpanded = expandedArtifact === `${artifact.type}-${index}`
+    const artifactId = `${artifact.type}-${index}`
+
+    const getIcon = () => {
+      switch (artifact.type) {
+        case 'email': return '📧'
+        case 'po': return '📦'
+        case 'invoice': return '🧾'
+        case 'audit': return '🔍'
+        case 'shipment': return '🚚'
+        case 'notification': return '🔔'
+        default: return '📄'
+      }
+    }
+
+    const getTitle = () => {
+      switch (artifact.type) {
+        case 'email': return artifact.subject
+        case 'po': return `${artifact.poNumber} - ${artifact.supplierName}`
+        case 'invoice': return `${artifact.invoiceNumber} - ${artifact.customerName}`
+        case 'audit': return `${artifact.type} Audit - ${artifact.supplierId}`
+        case 'notification': return artifact.title
+        default: return 'Artifact'
+      }
+    }
+
+    return (
+      <div
+        key={artifactId}
+        className={`artifact-card ${artifact.type} ${isExpanded ? 'expanded' : ''}`}
+        onClick={() => toggleArtifactExpand(artifactId)}
+      >
+        <div className="artifact-header">
+          <span className="artifact-icon">{getIcon()}</span>
+          <span className="artifact-title">{getTitle()}</span>
+          <div className="artifact-meta">
+            <span className={`artifact-type-badge ${artifact.type}`}>{artifact.type}</span>
+            <span>{formatTime(artifact.timestamp)}</span>
+            <span className="artifact-expand-icon">{isExpanded ? '▲' : '▼'}</span>
+          </div>
+        </div>
+
+        {isExpanded && (
+          <div className="artifact-details">
+            {artifact.type === 'email' && (
+              <>
+                <div className="artifact-detail-row">
+                  <span className="artifact-detail-label">To:</span>
+                  <span className="artifact-detail-value">{artifact.to?.join(', ')}</span>
+                </div>
+                <div className="artifact-detail-row">
+                  <span className="artifact-detail-label">From:</span>
+                  <span className="artifact-detail-value">{artifact.from}</span>
+                </div>
+                {artifact.body && (
+                  <div className="artifact-body">{artifact.body}</div>
+                )}
+              </>
+            )}
+
+            {artifact.type === 'po' && (
+              <>
+                <div className="artifact-detail-row">
+                  <span className="artifact-detail-label">Amount:</span>
+                  <span className="artifact-detail-value">${artifact.totalAmount?.toLocaleString()}</span>
+                </div>
+                <div className="artifact-detail-row">
+                  <span className="artifact-detail-label">Status:</span>
+                  <span className="artifact-detail-value">{artifact.status}</span>
+                </div>
+                <div className="artifact-detail-row">
+                  <span className="artifact-detail-label">Items:</span>
+                  <span className="artifact-detail-value">{artifact.items?.length || 0} line items</span>
+                </div>
+              </>
+            )}
+
+            {artifact.type === 'invoice' && (
+              <>
+                <div className="artifact-detail-row">
+                  <span className="artifact-detail-label">Amount:</span>
+                  <span className="artifact-detail-value">${artifact.amount?.toLocaleString()}</span>
+                </div>
+                <div className="artifact-detail-row">
+                  <span className="artifact-detail-label">Order:</span>
+                  <span className="artifact-detail-value">{artifact.orderId}</span>
+                </div>
+                <div className="artifact-detail-row">
+                  <span className="artifact-detail-label">Status:</span>
+                  <span className="artifact-detail-value">{artifact.status}</span>
+                </div>
+              </>
+            )}
+
+            {artifact.type === 'audit' && (
+              <>
+                <div className="artifact-detail-row">
+                  <span className="artifact-detail-label">Type:</span>
+                  <span className="artifact-detail-value">{artifact.auditType}</span>
+                </div>
+                <div className="artifact-detail-row">
+                  <span className="artifact-detail-label">Status:</span>
+                  <span className="artifact-detail-value">{artifact.status}</span>
+                </div>
+                <div className="artifact-detail-row">
+                  <span className="artifact-detail-label">Scheduled:</span>
+                  <span className="artifact-detail-value">{new Date(artifact.scheduledDate).toLocaleDateString()}</span>
+                </div>
+              </>
+            )}
+
+            <div className="artifact-actions">
+              <button
+                className="artifact-btn primary"
+                onClick={(e) => { e.stopPropagation(); openArtifactModal(artifact, artifact.type); }}
+              >
+                View Full Details
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Render Artifact Modal
+  const renderArtifactModal = () => {
+    if (!modalArtifact) return null
+
+    return (
+      <div className="modal-overlay" onClick={closeArtifactModal}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <div className="modal-title">
+              {modalArtifact.type === 'email' && '📧'}
+              {modalArtifact.type === 'po' && '📦'}
+              {modalArtifact.type === 'invoice' && '🧾'}
+              {modalArtifact.type === 'audit' && '🔍'}
+              <span style={{ textTransform: 'uppercase' }}>{modalArtifact.type}</span> Details
+            </div>
+            <button className="modal-close" onClick={closeArtifactModal}>×</button>
+          </div>
+
+          <div className="modal-body">
+            {modalArtifact.type === 'email' && (
+              <>
+                <div className="modal-section">
+                  <h4>Email Information</h4>
+                  <div className="modal-grid">
+                    <div className="modal-field">
+                      <div className="modal-field-label">Subject</div>
+                      <div className="modal-field-value">{modalArtifact.subject}</div>
+                    </div>
+                    <div className="modal-field">
+                      <div className="modal-field-label">Sent</div>
+                      <div className="modal-field-value">{new Date(modalArtifact.timestamp).toLocaleString()}</div>
+                    </div>
+                    <div className="modal-field">
+                      <div className="modal-field-label">From</div>
+                      <div className="modal-field-value">{modalArtifact.from}</div>
+                    </div>
+                    <div className="modal-field">
+                      <div className="modal-field-label">To</div>
+                      <div className="modal-field-value">{modalArtifact.to?.join(', ')}</div>
+                    </div>
+                  </div>
+                </div>
+                {modalArtifact.body && (
+                  <div className="modal-section">
+                    <h4>Message Body</h4>
+                    <div className="artifact-body" style={{ maxHeight: '300px' }}>{modalArtifact.body}</div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {modalArtifact.type === 'po' && (
+              <>
+                <div className="modal-section">
+                  <h4>Purchase Order</h4>
+                  <div className="modal-grid">
+                    <div className="modal-field">
+                      <div className="modal-field-label">PO Number</div>
+                      <div className="modal-field-value">{modalArtifact.poNumber}</div>
+                    </div>
+                    <div className="modal-field">
+                      <div className="modal-field-label">Status</div>
+                      <div className="modal-field-value">{modalArtifact.status}</div>
+                    </div>
+                    <div className="modal-field">
+                      <div className="modal-field-label">Supplier</div>
+                      <div className="modal-field-value">{modalArtifact.supplierName}</div>
+                    </div>
+                    <div className="modal-field">
+                      <div className="modal-field-label">Total Amount</div>
+                      <div className="modal-field-value" style={{ color: '#4ade80', fontWeight: 700 }}>
+                        ${modalArtifact.totalAmount?.toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {modalArtifact.items?.length > 0 && (
+                  <div className="modal-section">
+                    <h4>Line Items ({modalArtifact.items.length})</h4>
+                    {modalArtifact.items.map((item, idx) => (
+                      <div key={idx} className="artifact-detail-row">
+                        <span className="artifact-detail-label">{item.sku || item.name}</span>
+                        <span className="artifact-detail-value">
+                          {item.quantity} × ${item.unitPrice} = ${(item.quantity * item.unitPrice).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {modalArtifact.type === 'invoice' && (
+              <div className="modal-section">
+                <h4>Invoice Details</h4>
+                <div className="modal-grid">
+                  <div className="modal-field">
+                    <div className="modal-field-label">Invoice Number</div>
+                    <div className="modal-field-value">{modalArtifact.invoiceNumber}</div>
+                  </div>
+                  <div className="modal-field">
+                    <div className="modal-field-label">Customer</div>
+                    <div className="modal-field-value">{modalArtifact.customerName}</div>
+                  </div>
+                  <div className="modal-field">
+                    <div className="modal-field-label">Amount</div>
+                    <div className="modal-field-value" style={{ color: '#4ade80', fontWeight: 700 }}>
+                      ${modalArtifact.amount?.toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="modal-field">
+                    <div className="modal-field-label">Status</div>
+                    <div className="modal-field-value">{modalArtifact.status}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="modal-footer">
+            <button className="btn-secondary" onClick={closeArtifactModal}>Close</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Render Visual Simulation Tab
+  const renderSimulationView = () => {
+    const stations = [
+      { id: 'smt', name: 'SMT Assembly', icon: '🔧', status: state.status === 'running' ? 'active' : 'idle', throughput: 42, workers: 20 },
+      { id: 'driver', name: 'Driver Assembly', icon: '🔊', status: state.status === 'running' ? 'active' : 'idle', throughput: 38, workers: 15 },
+      { id: 'housing', name: 'Housing', icon: '📦', status: 'idle', throughput: 40, workers: 18 },
+      { id: 'pairing', name: 'Pairing', icon: '📡', status: state.status === 'running' ? 'active' : 'idle', throughput: 45, workers: 12 },
+      { id: 'qc', name: 'Quality Control', icon: '✅', status: 'idle', throughput: 44, workers: 10 },
+      { id: 'packaging', name: 'Packaging', icon: '🎁', status: 'idle', throughput: 50, workers: 15 }
+    ]
+
+    const orders = activeScenario?.simulatedData?.injectedOrders || [
+      { id: 'ORD-001', customer: 'TechMart', quantity: 500, progress: 65, deadline: 5, status: 'on-track' },
+      { id: 'ORD-002', customer: 'ElectroHub', quantity: 300, progress: 40, deadline: 3, status: 'at-risk' },
+      { id: 'ORD-003', customer: 'GadgetWorld', quantity: 1000, progress: 20, deadline: 10, status: 'on-track' }
+    ]
+
+    const flowNodes = [
+      { id: 'inventory', label: 'Inventory', icon: '📦', value: '2,450 units', active: true },
+      { id: 'production', label: 'Production', icon: '🏭', value: '500/day', active: state.status === 'running' },
+      { id: 'qc', label: 'QC', icon: '✅', value: '97% pass', active: false },
+      { id: 'shipping', label: 'Shipping', icon: '🚚', value: '3 pending', active: false }
+    ]
+
+    return (
+      <div className="simulation-tab">
+        {/* Factory Floor */}
+        <div>
+          <h3 style={{ fontSize: '0.9rem', color: '#888', marginBottom: '12px' }}>FACTORY FLOOR STATUS</h3>
+          <div className="factory-floor">
+            {stations.map(station => (
+              <div key={station.id} className={`station-card ${station.status}`}>
+                <div className="station-icon">{station.icon}</div>
+                <div className="station-name">{station.name}</div>
+                <div className="station-status">{station.status}</div>
+                <div className="station-throughput">{station.throughput}/hr</div>
+                <div className="station-workers">👷 {station.workers}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Order Timeline */}
+        <div className="order-timeline">
+          <div className="timeline-header">
+            <h3 style={{ fontSize: '0.9rem', color: '#888', margin: 0 }}>ORDER TIMELINE</h3>
+            <div className="timeline-legend">
+              <div className="legend-item"><div className="legend-dot on-track"></div> On Track</div>
+              <div className="legend-item"><div className="legend-dot at-risk"></div> At Risk</div>
+              <div className="legend-item"><div className="legend-dot overdue"></div> Overdue</div>
+            </div>
+          </div>
+          <div className="gantt-container">
+            {orders.map(order => (
+              <div key={order.id} className="gantt-row">
+                <div className="gantt-label">
+                  <strong>{order.id}</strong><br/>
+                  <span style={{ fontSize: '0.7rem', color: '#888' }}>{order.customer}</span>
+                </div>
+                <div className="gantt-bar-container">
+                  <div
+                    className={`gantt-bar ${order.status}`}
+                    style={{ width: `${order.progress}%` }}
+                  >
+                    {order.progress}%
+                  </div>
+                  <div className="gantt-deadline" style={{ left: `${(order.deadline / 14) * 100}%` }} title={`Deadline: ${order.deadline} days`} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Material Flow */}
+        <div className="material-flow">
+          <h3 style={{ fontSize: '0.9rem', color: '#888', marginBottom: '12px' }}>MATERIAL FLOW</h3>
+          <div className="flow-container">
+            {flowNodes.map((node, idx) => (
+              <React.Fragment key={node.id}>
+                <div className={`flow-node ${node.active ? 'active' : ''}`}>
+                  <div className="flow-node-icon">{node.icon}</div>
+                  <div className="flow-node-label">{node.label}</div>
+                  <div className="flow-node-value">{node.value}</div>
+                </div>
+                {idx < flowNodes.length - 1 && (
+                  <div className={`flow-arrow ${node.active ? 'active' : ''}`}>→</div>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   // Render Scenarios Page
   const renderScenariosPage = () => {
@@ -1233,10 +2314,13 @@ function App() {
           </div>
         </div>
 
-        {/* Center Panel - Terminal / Services */}
+        {/* Center Panel - Terminal / Services / Simulation */}
         <div className="panel">
           <div className="panel-header">
-            <span>{activeTab === 'terminal' ? 'Live Terminal' : 'Service Activity'}</span>
+            <span>
+              {activeTab === 'terminal' ? 'Live Terminal' :
+               activeTab === 'services' ? 'Service Activity' : 'Visual Simulation'}
+            </span>
             <div className="panel-tabs">
               <button
                 className={`panel-tab ${activeTab === 'terminal' ? 'active' : ''}`}
@@ -1249,6 +2333,12 @@ function App() {
                 onClick={() => setActiveTab('services')}
               >
                 Services
+              </button>
+              <button
+                className={`panel-tab ${activeTab === 'simulation' ? 'active' : ''}`}
+                onClick={() => setActiveTab('simulation')}
+              >
+                Simulation
               </button>
             </div>
           </div>
@@ -1271,43 +2361,56 @@ function App() {
                   ))
                 )}
               </div>
-            ) : (
-              <div>
-                {services.emails?.slice(0, 10).map((email, idx) => (
-                  <div key={idx} className="service-item email">
-                    <div className="service-header">
-                      <span className="service-type">Email</span>
-                      <span className="service-time">{formatTime(email.timestamp)}</span>
-                    </div>
-                    <div className="service-content">
-                      <strong>{email.subject}</strong><br/>
-                      To: {email.to?.join(', ')}
-                    </div>
+            ) : activeTab === 'services' ? (
+              <div className="activity-timeline">
+                {/* Filter buttons */}
+                <div className="timeline-filters">
+                  <button
+                    className={`timeline-filter ${artifactFilter === 'all' ? 'active' : ''}`}
+                    onClick={() => setArtifactFilter('all')}
+                  >
+                    All
+                  </button>
+                  <button
+                    className={`timeline-filter ${artifactFilter === 'email' ? 'active' : ''}`}
+                    onClick={() => setArtifactFilter('email')}
+                  >
+                    📧 Emails
+                  </button>
+                  <button
+                    className={`timeline-filter ${artifactFilter === 'po' ? 'active' : ''}`}
+                    onClick={() => setArtifactFilter('po')}
+                  >
+                    📦 POs
+                  </button>
+                  <button
+                    className={`timeline-filter ${artifactFilter === 'invoice' ? 'active' : ''}`}
+                    onClick={() => setArtifactFilter('invoice')}
+                  >
+                    🧾 Invoices
+                  </button>
+                  <button
+                    className={`timeline-filter ${artifactFilter === 'audit' ? 'active' : ''}`}
+                    onClick={() => setArtifactFilter('audit')}
+                  >
+                    🔍 Audits
+                  </button>
+                </div>
+
+                {/* Artifact list */}
+                {filterArtifacts(getAllArtifacts()).length === 0 ? (
+                  <div className="idle-state">
+                    <div className="idle-icon">📋</div>
+                    <p className="idle-text">No service activity yet. Start the AI Agent to generate artifacts.</p>
                   </div>
-                ))}
-                {services.erp?.purchaseOrders?.slice(0, 5).map((po, idx) => (
-                  <div key={idx} className="service-item erp">
-                    <div className="service-header">
-                      <span className="service-type">ERP - PO</span>
-                      <span className="service-time">{formatTime(po.createdAt)}</span>
-                    </div>
-                    <div className="service-content">
-                      {po.poNumber} - ${po.totalAmount} - {po.supplierName}
-                    </div>
-                  </div>
-                ))}
-                {services.notifications?.slice(0, 5).map((notif, idx) => (
-                  <div key={idx} className="service-item notification">
-                    <div className="service-header">
-                      <span className="service-type">Notification</span>
-                      <span className="service-time">{formatTime(notif.timestamp)}</span>
-                    </div>
-                    <div className="service-content">
-                      <strong>{notif.title}</strong>: {notif.message}
-                    </div>
-                  </div>
-                ))}
+                ) : (
+                  filterArtifacts(getAllArtifacts()).slice(0, 20).map((artifact, idx) =>
+                    renderArtifactCard(artifact, idx)
+                  )
+                )}
               </div>
+            ) : (
+              renderSimulationView()
             )}
           </div>
         </div>
@@ -1331,6 +2434,25 @@ function App() {
               </div>
             )}
 
+            {/* AI Response to Questions */}
+            {aiResponse && (
+              <div className="ai-section">
+                <h3>AI Response</h3>
+                <div className="ai-question" style={{ background: 'linear-gradient(135deg, #1a2a4a 0%, #1a3d2a 100%)' }}>
+                  <div className="ai-question-text">
+                    🤖 {aiResponse.answer || aiResponse}
+                  </div>
+                  <button
+                    className="artifact-btn"
+                    style={{ marginTop: '10px' }}
+                    onClick={() => setAiResponse(null)}
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            )}
+
             {state.autoPilot && state.status === 'running' ? (
               <div className="ai-question">
                 <div className="ai-question-text">
@@ -1338,12 +2460,12 @@ function App() {
                   AI is automatically approving recommendations and executing workflows without human intervention.
                 </div>
               </div>
-            ) : !decision ? (
+            ) : !decision && !aiResponse ? (
               <div className="idle-state">
                 <div className="idle-icon">🤖</div>
-                <p className="idle-text">AI decisions will appear here</p>
+                <p className="idle-text">AI decisions will appear here. Ask a question below!</p>
               </div>
-            ) : (
+            ) : decision && (
               <>
                 {aiResult?.analysis && (
                   <div className="ai-section">
@@ -1523,11 +2645,25 @@ function App() {
             </div>
           </div>
           <div className="header-controls">
+            {simulationLoop.active && (
+              <div className="sim-loop-indicator">
+                <span className="pulse-dot"></span>
+                Loop #{simulationLoop.iteration}
+              </div>
+            )}
             {activeScenario && (
               <div className="scenario-indicator">
                 ⚡ {activeScenario.name}
               </div>
             )}
+            {/* Simulation Loop Toggle */}
+            <div
+              className={`sim-loop-toggle ${simulationLoop.active ? 'active' : ''}`}
+              onClick={simulationLoop.active ? stopSimulationLoop : startSimulationLoop}
+              style={{ cursor: 'pointer' }}
+            >
+              <span>{simulationLoop.active ? '⏹ Stop Loop' : '🔄 Start Loop'}</span>
+            </div>
             <div className={`autopilot-toggle ${state.autoPilot ? 'active' : ''}`}>
               <span>Auto-Pilot</span>
               <div
@@ -1538,7 +2674,7 @@ function App() {
             <span className={`status-badge status-${state.status}`}>
               {state.status.replace('_', ' ')}
             </span>
-            {state.status === 'idle' && (
+            {state.status === 'idle' && !simulationLoop.active && (
               <button className="btn-start" onClick={startPipeline}>
                 Start AI Agent
               </button>
@@ -1553,6 +2689,9 @@ function App() {
 
         {/* Page Content */}
         {currentPage === 'dashboard' ? renderDashboardPage() : renderScenariosPage()}
+
+        {/* Artifact Modal */}
+        {renderArtifactModal()}
       </div>
     </>
   )

@@ -34,6 +34,16 @@ const {
   buildScenarioAwarePrompt
 } = require('./scenarios');
 
+// Import simulation loop controller
+const {
+  startLoop,
+  stopLoop,
+  pauseLoop,
+  resumeLoop,
+  getLoopStatus,
+  getLoopHistory
+} = require('./simulation-loop');
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -42,7 +52,7 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 // Configuration
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDz3h3VXOH_lYhyKX0bhXBdWka148SqEB8';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyBKE96eysMe-YuJTFPWRXwrdSU4XZo13g8';
 const DATA_PATH = 'D:/n8n/data';
 const N8N_API_URL = 'http://localhost:5678/api/v1';
 const N8N_API_KEY = process.env.N8N_API_KEY || ''; // Set this after creating API key in n8n
@@ -936,6 +946,42 @@ wss.on('connection', (ws) => {
 
         case 'get_services':
           ws.send(JSON.stringify({ type: 'services', data: getAllServiceData() }));
+          break;
+
+        // Simulation Loop Controls
+        case 'start_simulation_loop':
+          console.log('Received start_simulation_loop request:', msg.options);
+          const startResult = startLoop(
+            msg.options || {},
+            broadcast,
+            async (autoApprove, scenario) => {
+              // Run a simplified pipeline for simulation
+              if (scenario) {
+                pipelineState.autoPilot = autoApprove;
+                await runPipeline();
+              }
+            }
+          );
+          ws.send(JSON.stringify({ type: 'simulation_status', data: startResult }));
+          break;
+
+        case 'stop_simulation_loop':
+          const stopResult = stopLoop(broadcast);
+          ws.send(JSON.stringify({ type: 'simulation_status', data: stopResult }));
+          break;
+
+        case 'pause_simulation_loop':
+          const pauseResult = pauseLoop(broadcast);
+          ws.send(JSON.stringify({ type: 'simulation_status', data: pauseResult }));
+          break;
+
+        case 'resume_simulation_loop':
+          const resumeResult = resumeLoop(broadcast, runPipeline);
+          ws.send(JSON.stringify({ type: 'simulation_status', data: resumeResult }));
+          break;
+
+        case 'get_loop_status':
+          ws.send(JSON.stringify({ type: 'simulation_status', data: getLoopStatus() }));
           break;
       }
     } catch (e) {
